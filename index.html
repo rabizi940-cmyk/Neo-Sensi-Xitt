@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neo Sensi - Gerador de Sensibilidade</title>
+    <style>
+        :root {
+            --neon-orange: #ff6600;
+            --neon-glow: #ff8800;
+            --bg-dark: #0d0d0d;
+            --card-bg: #1a1a1a;
+            --text-light: #ffffff;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-light);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            background: var(--card-bg);
+            border: 2px solid var(--neon-orange);
+            box-shadow: 0 0 20px var(--neon-orange);
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .logo {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--neon-orange);
+            text-shadow: 0 0 10px var(--neon-glow), 0 0 20px var(--neon-glow);
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .section-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        label {
+            display: block;
+            text-align: left;
+            margin: 10px 0 5px;
+            color: var(--neon-orange);
+            font-weight: bold;
+        }
+
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid var(--neon-orange);
+            background: #000;
+            color: #fff;
+            font-size: 1rem;
+            outline: none;
+            margin-bottom: 15px;
+        }
+
+        select:focus, input:focus {
+            box-shadow: 0 0 10px var(--neon-glow);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            background-color: var(--neon-orange);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 0 15px var(--neon-glow);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn:hover {
+            background-color: #fff;
+            color: var(--neon-orange);
+            box-shadow: 0 0 25px #fff;
+        }
+
+        .pix-box {
+            background: #111;
+            border: 1px dashed var(--neon-orange);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-size: 0.9rem;
+            word-break: break-all;
+        }
+
+        .pix-box strong {
+            color: var(--neon-orange);
+        }
+
+        /* Modal / Notificação do Próprio Site */
+        .notification-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .notification-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .notification-card {
+            background: var(--card-bg);
+            border: 2px solid var(--neon-orange);
+            box-shadow: 0 0 25px var(--neon-glow);
+            border-radius: 12px;
+            padding: 25px;
+            max-width: 350px;
+            width: 90%;
+            text-align: center;
+        }
+
+        .notification-card h3 {
+            color: var(--neon-orange);
+            margin-bottom: 10px;
+        }
+
+        .notification-card p {
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+        }
+
+        .result-box {
+            display: none;
+            background: #000;
+            border: 1px solid var(--neon-orange);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: left;
+        }
+
+        .result-box h4 {
+            color: var(--neon-orange);
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="logo">Neo Sensi</div>
+        <p class="section-title">Gere a melhor sensibilidade para o seu celular!</p>
+
+        <!-- Seleção de Marca -->
+        <label for="brandSelect">Selecione a Marca:</label>
+        <select id="brandSelect" onchange="updateModels()">
+            <option value="">-- Escolha uma marca --</option>
+            <option value="Apple">Apple (iPhone)</option>
+            <option value="Samsung">Samsung</option>
+            <option value="Xiaomi">Xiaomi / Poco / Redmi</option>
+            <option value="Motorola">Motorola</option>
+            <option value="Realme">Realme</option>
+            <option value="Infinix">Infinix</option>
+            <option value="ASUS">ASUS (ROG Phone)</option>
+        </select>
+
+        <!-- Seleção de Modelo -->
+        <label for="modelSelect">Selecione o Modelo:</label>
+        <select id="modelSelect" disabled>
+            <option value="">-- Selecione a marca primeiro --</option>
+        </select>
+
+        <!-- Informações do Pagamento -->
+        <div class="pix-box">
+            <p><strong>Valor:</strong> R$ 0,50</p>
+            <p><strong>Chave PIX (E-mail):</strong></p>
+            <p style="color: #fff; font-weight: bold; margin-top: 5px;">betaniaferreiradacruz@gmail.com</p>
+        </div>
+
+        <a href="https://www.instagram.com/ravvziin/" target="_blank" class="btn">Enviar Comprovante no Insta</a>
+
+        <div style="margin-top: 25px;">
+            <label for="accessCode">Digite o Código de Liberação:</label>
+            <input type="text" id="accessCode" placeholder="Insira o código recebido">
+            <button class="btn" onclick="generateSensi()">Gerar Sensibilidade VIP</button>
+        </div>
+
+        <!-- Resultado da Sensi -->
+        <div id="resultBox" class="result-box">
+            <h4>⚡ Sensibilidade Gerada com Sucesso ⚡</h4>
+            <p><strong>Geral:</strong> <span id="sensiGeral"></span></p>
+            <p><strong>Ponto Vermelho:</strong> <span id="sensiRedDot"></span></p>
+            <p><strong>Mira 2x:</strong> <span id="sensi2x"></span></p>
+            <p><strong>Mira 4x:</strong> <span id="sensi4x"></span></p>
+            <p><strong>AWM:</strong> <span id="sensiAWM"></span></p>
+            <p><strong>DPI Sugerida:</strong> <span id="sensiDPI"></span></p>
+            <p><strong>Tamanho do Botão:</strong> <span id="sensiBotao"></span></p>
+        </div>
+    </div>
+
+    <!-- Notificação Customizada (Sem Alert Padrão) -->
+    <div id="customNotification" class="notification-overlay">
+        <div class="notification-card">
+            <h3 id="notifTitle">Aviso</h3>
+            <p id="notifMessage">Mensagem da notificação.</p>
+            <button class="btn" onclick="closeNotification()">Entendido</button>
+        </div>
+    </div>
+
+    <script>
+        // Mapeamento de Marcas e Modelos
+        const modelsData = {
+            Apple: [
+                "iPhone 8 / 8 Plus", "iPhone X / XR / XS", "iPhone 11 / 11 Pro", 
+                "iPhone 12 / 12 Pro", "iPhone 13 / 13 Pro", "iPhone 14 / 14 Pro", 
+                "iPhone 15 / 15 Pro", "iPhone 16 / 16 Pro"
+            ],
+            Samsung: [
+                "Galaxy A10 / A20 / A30", "Galaxy A12 / A22 / A32", "Galaxy A50 / A51 / A52 / A53 / A54", 
+                "Galaxy A70 / A71 / A72 / A73", "Galaxy S10 / S20 FE", "Galaxy S21 / S22 / S23 / S24", 
+                "Galaxy M12 / M22 / M32 / M53"
+            ],
+            Xiaomi: [
+                "Redmi Note 8 / Note 9", "Redmi Note 10 / Note 11 / Note 12 / Note 13", 
+                "Poco X3 Pro / X3 NFC", "Poco X4 Pro / X5 Pro / X6 Pro", "Poco F3 / F4 / F5 / F6", 
+                "Xiaomi 11T / 12T / 13T / 14"
+            ],
+            Motorola: [
+                "Moto G8 / G9 / G10", "Moto G20 / G30 / G40 / G50", "Moto G60 / G82 / G84", 
+                "Edge 20 / Edge 30 / Edge 40 / Edge 50"
+            ],
+            Realme: [
+                "Realme 7 / 8 / 9 / 10 / 11 / 12", "Realme GT Neo 2 / GT Neo 3 / GT 5", 
+                "Realme C35 / C53 / C55"
+            ],
+            Infinix: [
+                "Infinix Hot 10 / Hot 11 / Hot 20 / Hot 30", "Infinix Note 12 / Note 30 VIP", 
+                "Infinix Zero Ultra / Zero 30"
+            ],
+            ASUS: [
+                "ROG Phone 3", "ROG Phone 5 / 5s", "ROG Phone 6 / 6 Pro", "ROG Phone 7 / 8"
+            ]
+        };
+
+        const SECRET_CODE = "938493498293829382932224089437290003984";
+
+        // Atualiza a lista de modelos dinamicamente
+        function updateModels() {
+            const brandSelect = document.getElementById("brandSelect");
+            const modelSelect = document.getElementById("modelSelect");
+            const selectedBrand = brandSelect.value;
+
+            modelSelect.innerHTML = '<option value="">-- Escolha o Modelo --</option>';
+
+            if (selectedBrand && modelsData[selectedBrand]) {
+                modelsData[selectedBrand].forEach(model => {
+                    const option = document.createElement("option");
+                    option.value = model;
+                    option.textContent = model;
+                    modelSelect.appendChild(option);
+                });
+                modelSelect.disabled = false;
+            } else {
+                modelSelect.disabled = true;
+            }
+        }
+
+        // Exibe a notificação com a interface do site
+        function showNotification(title, message) {
+            document.getElementById("notifTitle").innerText = title;
+            document.getElementById("notifMessage").innerText = message;
+            document.getElementById("customNotification").classList.add("active");
+        }
+
+        // Fecha a notificação
+        function closeNotification() {
+            document.getElementById("customNotification").classList.remove("active");
+        }
+
+        // Função de validação e geração da sensibilidade
+        function generateSensi() {
+            const brand = document.getElementById("brandSelect").value;
+            const model = document.getElementById("modelSelect").value;
+            const codeInput = document.getElementById("accessCode").value.trim();
+
+            if (!brand || !model) {
+                showNotification("Atenção", "Por favor, selecione a marca e o modelo do seu celular.");
+                return;
+            }
+
+            if (codeInput !== SECRET_CODE) {
+                showNotification("Acesso Negado", "Código de liberação incorreto ou inexistente. Realize o pagamento de R$ 0,50 e envie o comprovante no Instagram para receber o código.");
+                return;
+            }
+
+            // Gerar sensibilidades aleatórias mais realistas (altas)
+            document.getElementById("sensiGeral").innerText = Math.floor(Math.random() * 6) + 95; // 95-100
+            document.getElementById("sensiRedDot").innerText = Math.floor(Math.random() * 11) + 90; // 90-100
+            document.getElementById("sensi2x").innerText = Math.floor(Math.random() * 11) + 88; // 88-98
+            document.getElementById("sensi4x").innerText = Math.floor(Math.random() * 11) + 85; // 85-95
+            document.getElementById("sensiAWM").innerText = Math.floor(Math.random() * 21) + 30; // 30-50
+            document.getElementById("sensiDPI").innerText = Math.floor(Math.random() * 200) + 550; // 550-750
+            document.getElementById("sensiBotao").innerText = Math.floor(Math.random() * 15) + 45 + "%"; // 45%-60%
+
+            document.getElementById("resultBox").style.display = "block";
+            showNotification("Sucesso!", "Sua sensibilidade VIP foi gerada com sucesso!");
+        }
+    </script>
+</body>
+</html>
